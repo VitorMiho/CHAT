@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CHAT</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@100&display=swap" rel="stylesheet">
+  <style>
+    *{
+      margin: 0;
+      padding: 0;      
+      /*border: 1px red solid;*/
+    }    
+    #chatMens{
+      background-color: rgba(24, 134, 236, 0.377);
+      width: 650px;
+      height: 750px;
+      margin: 0 auto;
+      display: flex;
+      flex-direction: column;
+      margin-top: 50px;
+      border: 1px solid black;
+      border-radius: 15px;
+    }
+    #form{
+      position: fixed;
+      width: 645px;
+      display: flex;
+      flex-direction: row;
+      justify-content: space-evenly;
+      height: 30px;
+      margin: 0 auto;
+      margin-top: 700px;   
+      /*border: 1px solid red;*/   
+    }
+    #nome{
+      /*width: 135px;*/
+      font-family: Arial, Helvetica, sans-serif;
+      border: 1px solid black;
+      border-radius: 4px;
+    }
+    #mensagem{
+      width: 420px;
+      font-family: Arial, Helvetica, sans-serif;
+      border: 1px solid black;
+      border-radius: 4px;
+    }
+    #mensagens{
+      color: white;
+      margin-top: 40px;
+      margin-left: 20px;
+      margin-right: 20px;
+      font-family: Arial, Helvetica, sans-serif;
+      max-height: 78%;
+      overflow: auto; 
+      margin-bottom: 0px;
+      /*border: 1px solid red;*/
+      word-wrap: break-word; 
+      white-space: pre-wrap; 
+      display: flex;
+      flex-direction: column; 
+      align-items: flex-start;
+    }
+    #h1{
+      color: white;
+      margin: 0 auto;
+      font-family: 'Roboto', sans-serif;
+    }
+    #hr{
+      margin: 0 auto;
+      width: 480px;
+      color: aliceblue;      
+    }
+    #enviar{
+      background-color: rgba(0, 255, 255, 0.877);
+      width: 50px;
+      border: 1px solid;
+      border-radius: 5px;
+      font-family: Arial, Helvetica, sans-serif;
+    }
+    #enviar:hover{
+      cursor: pointer;
+    }
+  </style>
+</head>
+<body style="background-color: black">
+    <div id="chatMens">
+      <h1 id="h1">CHAT</h1>
+      <hr id="hr">
+      <ul id="mensagens"></ul>      
+      <form id="form">
+        <input id="nome" placeholder="Seu nome de usuário" autocomplete="off" maxlength="10" /><br>
+        <input id="mensagem" placeholder="Sua mensagem" autocomplete="off" maxlength="250" />
+        <button id="enviar">Enviar</button>
+      </form>
+    </div>
+
+    <!-- Importa o script do Socket.IO -->
+    <script src="/socket.io/socket.io.js"></script>
+    <script>
+    // Cria uma instância do Socket.IO
+    const socket = io();
+    // Seleciona o input do nome do usuário
+    const nomeInput = document.getElementById('nome');
+    // Seleciona o input da mensagem
+    const mensagemInput = document.getElementById('mensagem');
+    // Seleciona a lista de mensagens
+    const mensagens = document.getElementById('mensagens');
+
+    // Adiciona um evento de escuta para o envio do formulário
+    document.querySelector('form').addEventListener('submit', event => {
+      // Previne o envio padrão do formulário
+      event.preventDefault();
+      // Obtém o valor do input do nome do usuário
+      const nome = nomeInput.value;
+      // Obtém o valor do input da mensagem
+      const mensagem = mensagemInput.value;
+      // Verifica se ambos os campos foram preenchidos antes de enviar a mensagem
+      // Verifica se os valores são válidos (não estão em branco)
+      //trim() é um método da linguagem JavaScript que remove os espaços em branco do início e do final de uma string.
+      // emit envia um evento chamado "chat message" com um objeto contendo os valores de nome e mensagem para o servidor.
+      nome.trim() && mensagem.trim() && socket.emit('chat message', { nome, mensagem });
+      // Limpa o input da mensagem
+      mensagemInput.value = '';
+      // Desabilita o input do nome do usuário após a primeira mensagem
+      nomeInput.disabled = true; 
+    });
+  // Função para rolar para o final da lista de mensagens
+  function rolarParaFinal() {
+    mensagens.scrollTop = mensagens.scrollHeight;
+  }
+  // Adiciona um evento de escuta para o evento de mensagem recebido do servidor
+  socket.on('chat message', dados => {
+  // Cria um elemento de lista para exibir a mensagem
+  const lista = document.createElement('li');
+  // Define o texto da mensagem
+  lista.textContent = `${dados.nome}: ${dados.mensagem}`;
+  // Adiciona o elemento de lista à lista de mensagens
+  mensagens.appendChild(lista);
+  // Rola para o final da lista de mensagens
+  rolarParaFinal();
+  });
+  </script>
+</body>
+</html>
